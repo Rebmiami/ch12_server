@@ -14,7 +14,7 @@ config = {}
 def fetch_url():
     url = _url.get()
     config['images'] = []
-    _images.set(())  # initialised as an empty tuple
+    _content.set(())  # initialised as an empty tuple
     try:
         page = requests.get(url)
     except requests.RequestException as err:
@@ -23,11 +23,22 @@ def fetch_url():
         soup = BeautifulSoup(page.content, 'html.parser')
         images = fetch_images(soup, url)
         if images:
-            _images.set(tuple(img['name'] for img in images))
+            _content.set(tuple(img['name'] for img in images))
             sb('Images found: {}'.format(len(images)))
         else:
             sb('No images found')
         config['images'] = images
+
+
+def fetch_images(soup, base_url):
+    images = []
+    for img in soup.findAll('img'):
+        src = img.get('src')
+        img_url = f'{base_url}/{src}'
+        name = img_url.split('/')[-1]
+        images.append(dict(name=name, url=img_url))
+    return images
+
 
 def fetch_title():
     url = _url.get()
@@ -43,14 +54,36 @@ def fetch_title():
         else:
             sb('Title not found')
 
-def fetch_images(soup, base_url):
-    images = []
-    for img in soup.findAll('img'):
-        src = img.get('src')
-        img_url = f'{base_url}/{src}'
-        name = img_url.split('/')[-1]
-        images.append(dict(name=name, url=img_url))
-    return images
+
+def fetch_links():
+    url = _url.get()
+    config['links'] = []
+    _content.set(())  # initialised as an empty tuple
+    try:
+        page = requests.get(url)
+    except requests.RequestException as err:
+        sb(str(err))
+    else:
+        soup = BeautifulSoup(page.content, 'html.parser')
+        links = fetch_ext_urls(soup, url)
+        if links:
+            _content.set(tuple(link['url'] for link in links))
+            sb('External links found: {}'.format(len(links)))
+        else:
+            sb('No external links found')
+        config['links'] = links
+
+
+def fetch_ext_urls(soup, base_url):
+    links = []
+    for link in soup.findAll('a'):
+        link_url = link.get('href')
+        if link_url.startswith(base_url):
+            continue
+        elif link_url.startswith('http://') or link_url.startswith('https://'):
+            name = link_url.split('/')[-1]
+            links.append(dict(name=name, url=link_url))
+    return links
 
 
 def save():
@@ -127,8 +160,8 @@ if __name__ == "__main__": # execute logic if run directly
     # fetch_title() is callback for button press
     _fetch_title_button.grid(row=1, column=1, sticky=W, padx=5)
     _fetch_link_button = ttk.Button(
-        _url_frame, text='Fetch link', command=fetch_url) # create button
-    # fetch_url() is callback for button press
+        _url_frame, text='Fetch link', command=fetch_links) # create button
+    # fetch_links() is callback for button press
     _fetch_link_button.grid(row=2, column=1, sticky=W, padx=5)
 
 
@@ -138,9 +171,9 @@ if __name__ == "__main__": # execute logic if run directly
     _img_frame.grid(row=1, column=0, sticky=(N, S, E, W))
 
     # Set _img_frame as parent of Listbox and _images is variable tied to
-    _images = StringVar()
+    _content = StringVar()
     _img_listbox = Listbox(
-        _img_frame, listvariable=_images, height=6, width=25)
+        _img_frame, listvariable=_content, height=6, width=25)
     _img_listbox.grid(row=0, column=0, sticky=(E, W), pady=5)
     #Scrollbar can move vertical
     _scrollbar = ttk.Scrollbar(
