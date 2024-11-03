@@ -29,6 +29,19 @@ def fetch_url():
             sb('No images found')
         config['images'] = images
 
+def fetch_title():
+    url = _url.get()
+    try:
+        page = requests.get(url)
+    except requests.RequestException as err:
+        sb(str(err))
+    else:
+        soup = BeautifulSoup(page.content, 'html.parser')
+        title = soup.find('title')
+        if title:
+            sb('Title found: {}'.format(title.contents))
+        else:
+            sb('Title not found')
 
 def fetch_images(soup, base_url):
     images = []
@@ -110,8 +123,8 @@ if __name__ == "__main__": # execute logic if run directly
     # fetch_url() is callback for button press
     _fetch_img_btn.grid(row=0, column=1, sticky=W, padx=5)
     _fetch_title_button = ttk.Button(
-        _url_frame, text='Fetch title', command=fetch_url) # create button
-    # fetch_url() is callback for button press
+        _url_frame, text='Fetch title', command=fetch_title) # create button
+    # fetch_title() is callback for button press
     _fetch_title_button.grid(row=1, column=1, sticky=W, padx=5)
     _fetch_link_button = ttk.Button(
         _url_frame, text='Fetch link', command=fetch_url) # create button
