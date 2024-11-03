@@ -105,10 +105,19 @@ if __name__ == "__main__": # execute logic if run directly
         _url_frame, width=40, textvariable=_url) # text box
     _url_entry.grid(row=0, column=0, sticky=(E, W, S, N), padx=5)
     # grid mgr places object at position
-    _fetch_btn = ttk.Button(
-        _url_frame, text='Fetch info', command=fetch_url) # create button
+    _fetch_img_btn = ttk.Button(
+        _url_frame, text='Fetch img', command=fetch_url) # create button
     # fetch_url() is callback for button press
-    _fetch_btn.grid(row=0, column=1, sticky=W, padx=5)
+    _fetch_img_btn.grid(row=0, column=1, sticky=W, padx=5)
+    _fetch_title_button = ttk.Button(
+        _url_frame, text='Fetch title', command=fetch_url) # create button
+    # fetch_url() is callback for button press
+    _fetch_title_button.grid(row=1, column=1, sticky=W, padx=5)
+    _fetch_link_button = ttk.Button(
+        _url_frame, text='Fetch link', command=fetch_url) # create button
+    # fetch_url() is callback for button press
+    _fetch_link_button.grid(row=2, column=1, sticky=W, padx=5)
+
 
     # img_frame contains Lisbox and Radio Frame
     _img_frame = ttk.LabelFrame(
